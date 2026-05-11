@@ -1,9 +1,15 @@
-resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
-  name      = "docker-test"
-  node_name = "pve"
+resource "proxmox_virtual_environment_container" "ubuntu_lxc" {
 
-  clone {
-    vm_id = 9000
+  node_name = "pve"
+  vm_id     = 500
+  hostname  = "test-lxc"
+
+  unprivileged = true
+  started       = true
+
+  operating_system {
+    template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+    type             = "ubuntu"
   }
 
   cpu {
@@ -11,24 +17,31 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   }
 
   memory {
-    dedicated = 4096
+    dedicated = 2048
+    swap      = 512
   }
 
-  network_device {
+  disk {
+    datastore_id = "local-lvm"
+    size         = 20
+  }
+
+  network_interface {
+    name   = "eth0"
     bridge = "vmbr0"
   }
 
   initialization {
+    hostname = "test-lxc"
+
     ip_config {
       ipv4 {
         address = "dhcp"
       }
     }
+  }
 
-    user_account {
-      username = "ubuntu"
-
-      
-    }
+  features {
+    nesting = true
   }
 }
