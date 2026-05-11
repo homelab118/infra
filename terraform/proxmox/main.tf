@@ -31,12 +31,13 @@ resource "proxmox_virtual_environment_container" "ubuntu_lxc" {
   }
 
   network_interface {
-    name = "veth0"
+    name   = "veth0"
+    bridge = "vmbr0"
   }
 
   disk {
     datastore_id = "local-lvm"
-    size         = "10G"
+    size         = 10
   }
 
   memory {
