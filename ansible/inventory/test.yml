@@ -1,0 +1,35 @@
+- hosts: test
+  become: true
+
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install useful packages
+      apt:
+        name:
+          - htop
+          - curl
+          - git
+          - nginx
+          - docker.io
+        state: present
+
+    - name: Enable nginx
+      service:
+        name: nginx
+        enabled: true
+        state: started
+
+    - name: Enable docker
+      service:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Create test file
+      copy:
+        content: "Configured by Ansible"
+        dest: /root/ansible-test.txt

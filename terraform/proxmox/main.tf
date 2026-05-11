@@ -6,7 +6,7 @@ resource "proxmox_virtual_environment_container" "ubuntu_lxc" {
   vm_id     = 500
 
   unprivileged = true
-  started       = false
+  started       = true
   start_on_boot = true
 
   features {
