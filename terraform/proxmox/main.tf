@@ -2,11 +2,11 @@ resource "proxmox_virtual_environment_container" "ubuntu_lxc" {
 
   description = "Managed by Terraform"
 
-  node_name = "pve"
-  vm_id     = 201
+  node_name = "proxmox"
+  vm_id     = 500
 
   unprivileged = true
-  started       = true
+  started       = false
   start_on_boot = true
 
   features {
@@ -37,11 +37,11 @@ resource "proxmox_virtual_environment_container" "ubuntu_lxc" {
 
   disk {
     datastore_id = "local-lvm"
-    size         = 10
+    size         = 8
   }
 
   memory {
-    dedicated = 2048
+    dedicated = 1024
     swap      = 512
   }
 
