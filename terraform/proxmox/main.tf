@@ -1,37 +1,20 @@
 resource "proxmox_virtual_environment_container" "ubuntu_lxc" {
 
+  description = "Managed by Terraform"
+
   node_name = "pve"
-  vm_id     = 500
-  hostname  = "test-lxc"
+  vm_id     = 201
 
   unprivileged = true
   started       = true
+  start_on_boot = true
 
-  operating_system {
-    template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-    type             = "ubuntu"
-  }
-
-  cpu {
-    cores = 2
-  }
-
-  memory {
-    dedicated = 2048
-    swap      = 512
-  }
-
-  disk {
-    datastore_id = "local-lvm"
-    size         = 20
-  }
-
-  network_interface {
-    name   = "eth0"
-    bridge = "vmbr0"
+  features {
+    nesting = true
   }
 
   initialization {
+
     hostname = "test-lxc"
 
     ip_config {
@@ -39,9 +22,34 @@ resource "proxmox_virtual_environment_container" "ubuntu_lxc" {
         address = "dhcp"
       }
     }
+
+    user_account {
+      keys = [
+        trimspace(file("~/.ssh/id_ed25519.pub"))
+      ]
+    }
   }
 
-  features {
-    nesting = true
+  network_interface {
+    name = "veth0"
+  }
+
+  disk {
+    datastore_id = "local-lvm"
+    size         = "10G"
+  }
+
+  memory {
+    dedicated = 2048
+    swap      = 512
+  }
+
+  cpu {
+    cores = 2
+  }
+
+  operating_system {
+    template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+    type             = "ubuntu"
   }
 }
