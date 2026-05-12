@@ -115,6 +115,12 @@ variable "template_url" {
   description = "Template download URL"
 }
 
+variable "template_file_id" {
+  type        = string
+  description = "Existing template file ID to use instead of download"
+  default     = null
+}
+
 variable "template_verify" {
   type        = bool
   description = "Verify TLS certificates when downloading the template"

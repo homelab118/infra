@@ -6,7 +6,15 @@ terraform {
   }
 }
 
+locals {
+  lxc_template_file_id = coalesce(
+    var.template_file_id,
+    try(proxmox_download_file.lxc_template[0].id, null)
+  )
+}
+
 resource "proxmox_download_file" "lxc_template" {
+  count        = var.template_file_id == null ? 1 : 0
   content_type = "vztmpl"
   datastore_id = var.template_datastore_id
   node_name    = var.node_name
@@ -69,7 +77,7 @@ resource "proxmox_virtual_environment_container" "this" {
   }
 
   operating_system {
-    template_file_id = proxmox_download_file.lxc_template.id
+    template_file_id = local.lxc_template_file_id
     type             = "ubuntu"
   }
 

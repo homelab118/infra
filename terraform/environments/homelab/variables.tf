@@ -134,6 +134,12 @@ variable "lxc_template_file_name" {
   default     = "ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
 }
 
+variable "lxc_template_file_id" {
+  type        = string
+  description = "Existing template file ID to use instead of download"
+  default     = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+}
+
 variable "lxc_template_url" {
   type        = string
   description = "Optional LXC template URL override"

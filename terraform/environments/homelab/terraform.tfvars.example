@@ -8,4 +8,5 @@ proxmox_token_secret = "change-me"
 # lxc_ipv4_address = "192.168.1.110/24"
 # lxc_ipv4_gateway = "192.168.1.1"
 # lxc_dns_servers = ["192.168.1.90"]
+# lxc_template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
 # lxc_template_verify = false

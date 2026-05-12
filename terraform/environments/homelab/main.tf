@@ -24,6 +24,7 @@ module "reverse_proxy" {
   unprivileged          = var.lxc_unprivileged
   start_on_boot         = var.lxc_start_on_boot
   started               = var.lxc_started
+  template_file_id      = var.lxc_template_file_id
   template_file_name    = var.lxc_template_file_name
   template_url          = local.lxc_template_url
   template_verify       = var.lxc_template_verify
