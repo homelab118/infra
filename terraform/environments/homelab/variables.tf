@@ -89,7 +89,7 @@ variable "lxc_dns_servers" {
 variable "lxc_disk_size_gb" {
   type        = number
   description = "Rootfs size in GB"
-  default     = 8
+  default     = 4
 }
 
 variable "lxc_memory_mb" {
