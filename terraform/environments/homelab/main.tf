@@ -26,5 +26,6 @@ module "reverse_proxy" {
   started               = var.lxc_started
   template_file_name    = var.lxc_template_file_name
   template_url          = local.lxc_template_url
+  template_verify       = var.lxc_template_verify
   tags                  = var.lxc_tags
 }

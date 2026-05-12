@@ -140,6 +140,12 @@ variable "lxc_template_url" {
   default     = null
 }
 
+variable "lxc_template_verify" {
+  type        = bool
+  description = "Verify TLS certificates for the template download"
+  default     = true
+}
+
 variable "lxc_root_password" {
   type        = string
   description = "Optional root password"

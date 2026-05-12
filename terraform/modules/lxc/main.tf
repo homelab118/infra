@@ -13,6 +13,7 @@ resource "proxmox_download_file" "lxc_template" {
   url          = var.template_url
   file_name    = var.template_file_name
   overwrite    = false
+  verify       = var.template_verify
 }
 
 resource "proxmox_virtual_environment_container" "this" {

@@ -115,6 +115,12 @@ variable "template_url" {
   description = "Template download URL"
 }
 
+variable "template_verify" {
+  type        = bool
+  description = "Verify TLS certificates when downloading the template"
+  default     = true
+}
+
 variable "tags" {
   type        = list(string)
   description = "Container tags"
