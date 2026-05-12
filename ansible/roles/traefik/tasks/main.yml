@@ -94,12 +94,18 @@
     mode: "0644"
   notify: restart traefik
 
+- name: Build TLS SAN string
+  ansible.builtin.set_fact:
+    traefik_tls_san_string: >-
+      {{ traefik_tls_sans | map('regex_replace', '^(.*)$', 'DNS:\\1') | join(',') }}
+  when: traefik_generate_self_signed | bool
+
 - name: Generate self-signed certificate
   ansible.builtin.command: >
     openssl req -x509 -newkey rsa:2048 -nodes
     -days {{ traefik_self_signed_days }}
     -subj "/CN={{ traefik_domain }}"
-    -addext "subjectAltName=DNS:{{ traefik_domain }}"
+    -addext "subjectAltName={{ traefik_tls_san_string }}"
     -keyout {{ traefik_certs_dir }}/traefik.key
     -out {{ traefik_certs_dir }}/traefik.crt
   args:

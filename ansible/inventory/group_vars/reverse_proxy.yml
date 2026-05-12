@@ -2,3 +2,62 @@ traefik_domain: "homelab118.home"
 traefik_version: "2.11.12"
 traefik_log_level: "INFO"
 traefik_enable_dashboard: false
+traefik_dashboard_host: "traefik.{{ traefik_domain }}"
+
+traefik_http_services:
+  - name: proxmox
+    host: "proxmox.{{ traefik_domain }}"
+    url: "https://192.168.1.100:8006"
+    servers_transport: proxmox-insecure
+    flush_interval: "-1"
+
+  - name: jellyfin
+    host: "jellyfin.{{ traefik_domain }}"
+    url: "http://192.168.1.120:8096"
+
+  - name: vault
+    host: "vault.{{ traefik_domain }}"
+    url: "http://192.168.1.124:8000"
+
+  - name: dns
+    host: "dns.{{ traefik_domain }}"
+    url: "http://192.168.1.90"
+
+  - name: dashboard
+    host: "dashboard.{{ traefik_domain }}"
+    url: "http://192.168.1.124:3000"
+
+  - name: portainer
+    host: "portainer.{{ traefik_domain }}"
+    url: "http://192.168.1.124:9000"
+
+  - name: n8n
+    host: "n8n.{{ traefik_domain }}"
+    url: "http://192.168.1.124:5678"
+    middlewares:
+      - n8n-headers
+
+  - name: git
+    host: "git.{{ traefik_domain }}"
+    url: "http://192.168.1.124:4000"
+
+  - name: asap
+    host: "asap.{{ traefik_domain }}"
+    url: "http://192.168.1.124:5173"
+
+  - name: vert
+    host: "vert.{{ traefik_domain }}"
+    url: "http://192.168.1.124:3001"
+
+  - name: firefly
+    host: "firefly.{{ traefik_domain }}"
+    url: "http://192.168.1.124:8080"
+
+  - name: memos
+    host: "memos.{{ traefik_domain }}"
+    url: "http://192.168.1.124:5230"
+
+  - name: uptime
+    host: "uptime.{{ traefik_domain }}"
+    url: "http://192.168.1.124:3001"
+    enabled: false

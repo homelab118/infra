@@ -12,3 +12,7 @@ traefik_generate_self_signed: true
 traefik_self_signed_days: 3650
 traefik_domain: "homelab118.home"
 traefik_enable_dashboard: false
+traefik_dashboard_host: "traefik.{{ traefik_domain }}"
+traefik_tls_sans:
+  - "*.{{ traefik_domain }}"
+  - "{{ traefik_domain }}"

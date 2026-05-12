@@ -1,6 +1,11 @@
 entryPoints:
   web:
     address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
   websecure:
     address: ":443"
 
@@ -17,5 +22,5 @@ accessLog:
   filePath: "{{ traefik_log_dir }}/access.log"
 
 api:
-  dashboard: true
+  dashboard: {{ traefik_enable_dashboard | bool | lower }}
   insecure: false

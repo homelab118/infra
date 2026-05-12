@@ -4,14 +4,53 @@ tls:
       defaultCertificate:
         certFile: "{{ traefik_certs_dir }}/traefik.crt"
         keyFile: "{{ traefik_certs_dir }}/traefik.key"
-{% if traefik_enable_dashboard %}
 
 http:
   routers:
+{% for svc in traefik_http_services if svc.enabled | default(true) %}
+    {{ svc.name }}:
+      rule: "Host(`{{ svc.host }}`)"
+      entryPoints:
+        - websecure
+      service: {{ svc.name }}
+      tls: {}
+{% if svc.middlewares is defined and svc.middlewares %}
+      middlewares:
+{% for mw in svc.middlewares %}
+        - {{ mw }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% if traefik_enable_dashboard %}
     traefik:
-      rule: "Host(`traefik.{{ traefik_domain }}`)"
+      rule: "Host(`{{ traefik_dashboard_host }}`)"
       entryPoints:
         - websecure
       service: api@internal
       tls: {}
 {% endif %}
+
+  services:
+{% for svc in traefik_http_services if svc.enabled | default(true) %}
+    {{ svc.name }}:
+      loadBalancer:
+        servers:
+          - url: "{{ svc.url }}"
+{% if svc.servers_transport is defined %}
+        serversTransport: {{ svc.servers_transport }}
+{% endif %}
+{% if svc.flush_interval is defined %}
+        responseForwarding:
+          flushInterval: "{{ svc.flush_interval }}"
+{% endif %}
+{% endfor %}
+
+  middlewares:
+    n8n-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Port: "443"
+
+  serversTransports:
+    proxmox-insecure:
+      insecureSkipVerify: true
