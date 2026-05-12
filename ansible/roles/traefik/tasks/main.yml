@@ -96,8 +96,7 @@
 
 - name: Build TLS SAN string
   ansible.builtin.set_fact:
-    traefik_tls_san_string: >-
-      {{ traefik_tls_sans | map('regex_replace', '^(.*)$', 'DNS:\\1') | join(',') }}
+    traefik_tls_san_string: "DNS:{{ traefik_domain }},DNS:*.{{ traefik_domain }}"
   when: traefik_generate_self_signed | bool
 
 - name: Generate self-signed certificate
