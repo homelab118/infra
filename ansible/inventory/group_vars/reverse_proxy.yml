@@ -1,7 +1,7 @@
 traefik_domain: "homelab118.home"
 traefik_version: "2.11.12"
 traefik_log_level: "INFO"
-traefik_enable_dashboard: false
+traefik_enable_dashboard: true
 traefik_dashboard_host: "traefik.{{ traefik_domain }}"
 
 traefik_http_services:
