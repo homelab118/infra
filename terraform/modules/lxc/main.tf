@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+    }
+  }
+}
+
 resource "proxmox_virtual_environment_download_file" "lxc_template" {
   content_type = "vztmpl"
   datastore_id = var.template_datastore_id
