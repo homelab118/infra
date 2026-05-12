@@ -1,0 +1,127 @@
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - tar
+      - openssl
+      - libcap2-bin
+    state: present
+    update_cache: true
+
+- name: Create Traefik group
+  ansible.builtin.group:
+    name: "{{ traefik_group }}"
+    system: true
+
+- name: Create Traefik user
+  ansible.builtin.user:
+    name: "{{ traefik_user }}"
+    group: "{{ traefik_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create Traefik directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ traefik_user }}"
+    group: "{{ traefik_group }}"
+    mode: "{{ item.mode | default('0755') }}"
+  loop:
+    - path: "{{ traefik_config_dir }}"
+    - path: "{{ traefik_dynamic_dir }}"
+    - path: "{{ traefik_certs_dir }}"
+      mode: "0750"
+    - path: "{{ traefik_data_dir }}"
+    - path: "{{ traefik_log_dir }}"
+
+- name: Download Traefik archive
+  ansible.builtin.get_url:
+    url: "{{ traefik_download_url }}"
+    dest: "/tmp/traefik_{{ traefik_version }}.tar.gz"
+    mode: "0644"
+
+- name: Extract Traefik binary
+  ansible.builtin.unarchive:
+    src: "/tmp/traefik_{{ traefik_version }}.tar.gz"
+    dest: "/usr/local/bin"
+    remote_src: true
+  notify: restart traefik
+
+- name: Ensure Traefik binary permissions
+  ansible.builtin.file:
+    path: /usr/local/bin/traefik
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Check Traefik capabilities
+  ansible.builtin.command: getcap /usr/local/bin/traefik
+  register: traefik_getcap
+  changed_when: false
+  failed_when: false
+
+- name: Allow Traefik to bind low ports
+  ansible.builtin.command: setcap 'cap_net_bind_service=+ep' /usr/local/bin/traefik
+  when: "'cap_net_bind_service' not in traefik_getcap.stdout"
+
+- name: Install Traefik static config
+  ansible.builtin.template:
+    src: "{{ traefik_config_src_dir }}/traefik.yml.j2"
+    dest: "{{ traefik_config_dir }}/traefik.yml"
+    owner: "{{ traefik_user }}"
+    group: "{{ traefik_group }}"
+    mode: "0644"
+  notify: restart traefik
+
+- name: Install Traefik dynamic config
+  ansible.builtin.template:
+    src: "{{ traefik_config_src_dir }}/dynamic.yml.j2"
+    dest: "{{ traefik_dynamic_dir }}/dynamic.yml"
+    owner: "{{ traefik_user }}"
+    group: "{{ traefik_group }}"
+    mode: "0644"
+  notify: restart traefik
+
+- name: Install Traefik systemd unit
+  ansible.builtin.template:
+    src: traefik.service.j2
+    dest: /etc/systemd/system/traefik.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart traefik
+
+- name: Generate self-signed certificate
+  ansible.builtin.command: >
+    openssl req -x509 -newkey rsa:2048 -nodes
+    -days {{ traefik_self_signed_days }}
+    -subj "/CN={{ traefik_domain }}"
+    -addext "subjectAltName=DNS:{{ traefik_domain }}"
+    -keyout {{ traefik_certs_dir }}/traefik.key
+    -out {{ traefik_certs_dir }}/traefik.crt
+  args:
+    creates: "{{ traefik_certs_dir }}/traefik.crt"
+  when: traefik_generate_self_signed | bool
+
+- name: Set certificate permissions
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: "{{ traefik_user }}"
+    group: "{{ traefik_group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ traefik_certs_dir }}/traefik.crt"
+      mode: "0644"
+    - path: "{{ traefik_certs_dir }}/traefik.key"
+      mode: "0640"
+  when: traefik_generate_self_signed | bool
+
+- name: Enable and start Traefik
+  ansible.builtin.systemd:
+    name: traefik
+    state: started
+    enabled: true
+    daemon_reload: true

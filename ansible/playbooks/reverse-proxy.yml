@@ -1,0 +1,7 @@
+- name: Configure reverse proxy LXC
+  hosts: reverse_proxy
+  gather_facts: true
+  vars:
+    traefik_config_src_dir: "{{ playbook_dir }}/../../configs/traefik"
+  roles:
+    - traefik

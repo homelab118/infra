@@ -1,0 +1,17 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: "{{ traefik_certs_dir }}/traefik.crt"
+        keyFile: "{{ traefik_certs_dir }}/traefik.key"
+{% if traefik_enable_dashboard %}
+
+http:
+  routers:
+    traefik:
+      rule: "Host(`traefik.{{ traefik_domain }}`)"
+      entryPoints:
+        - websecure
+      service: api@internal
+      tls: {}
+{% endif %}

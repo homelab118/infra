@@ -1,0 +1,14 @@
+traefik_version: "2.11.12"
+traefik_user: "traefik"
+traefik_group: "traefik"
+traefik_download_url: "https://github.com/traefik/traefik/releases/download/v{{ traefik_version }}/traefik_v{{ traefik_version }}_linux_amd64.tar.gz"
+traefik_config_dir: "/etc/traefik"
+traefik_dynamic_dir: "/etc/traefik/dynamic"
+traefik_certs_dir: "/etc/traefik/certs"
+traefik_data_dir: "/var/lib/traefik"
+traefik_log_dir: "/var/log/traefik"
+traefik_log_level: "INFO"
+traefik_generate_self_signed: true
+traefik_self_signed_days: 3650
+traefik_domain: "homelab118.home"
+traefik_enable_dashboard: false

@@ -1,0 +1,4 @@
+traefik_domain: "homelab118.home"
+traefik_version: "2.11.12"
+traefik_log_level: "INFO"
+traefik_enable_dashboard: false

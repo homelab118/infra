@@ -1,0 +1,21 @@
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  file:
+    directory: "{{ traefik_dynamic_dir }}"
+    watch: true
+
+log:
+  level: "{{ traefik_log_level }}"
+  filePath: "{{ traefik_log_dir }}/traefik.log"
+
+accessLog:
+  filePath: "{{ traefik_log_dir }}/access.log"
+
+api:
+  dashboard: true
+  insecure: false

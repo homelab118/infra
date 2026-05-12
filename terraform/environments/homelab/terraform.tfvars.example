@@ -1,0 +1,10 @@
+proxmox_api_url      = "https://proxmox:8006/api2/json"
+proxmox_token_id     = "root@pam!terraform"
+proxmox_token_secret = "change-me"
+
+# Optional overrides
+# lxc_node_name = "proxmox"
+# lxc_vm_id = 110
+# lxc_ipv4_address = "192.168.1.110/24"
+# lxc_ipv4_gateway = "192.168.1.1"
+# lxc_dns_servers = ["192.168.1.90"]
