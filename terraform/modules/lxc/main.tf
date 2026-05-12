@@ -6,7 +6,7 @@ terraform {
   }
 }
 
-resource "proxmox_virtual_environment_download_file" "lxc_template" {
+resource "proxmox_download_file" "lxc_template" {
   content_type = "vztmpl"
   datastore_id = var.template_datastore_id
   node_name    = var.node_name
@@ -68,7 +68,7 @@ resource "proxmox_virtual_environment_container" "this" {
   }
 
   operating_system {
-    template_file_id = proxmox_virtual_environment_download_file.lxc_template.id
+    template_file_id = proxmox_download_file.lxc_template.id
     type             = "ubuntu"
   }
 
