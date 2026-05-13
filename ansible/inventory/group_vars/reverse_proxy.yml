@@ -48,6 +48,10 @@ traefik_http_services:
   - name: vert
     host: "vert.{{ traefik_domain }}"
     url: "http://192.168.1.124:3001"
+  
+  - name: wud
+    host: "wud.{{ traefik_domain }}"
+    url: "http://192.168.1.124:3002"
 
   - name: firefly
     host: "firefly.{{ traefik_domain }}"
