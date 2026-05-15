@@ -1,10 +1,10 @@
-```
+
 # Homelab Infrastructure as Code
 
 This repo provisions a lightweight Proxmox LXC for Traefik and configures it with Ansible. The first service is a dedicated reverse proxy container running Traefik directly (no Docker).
 
 ## Structure
-
+```
 infra/
 ├── terraform/
 │   ├── environments/
@@ -39,13 +39,130 @@ infra/
      └── traefik/
           ├── traefik.yml.j2
           └── dynamic.yml.j2
-
+```
 ## Naming conventions
 
 - Folders and playbooks: kebab-case
 - Ansible group names and variables: snake_case
 - Terraform module names: snake_case
 - VMID scheme: 100-199 infra LXCs (reverse-proxy=110), 200-299 app LXCs, 300-399 storage/monitoring, 900-999 temp
+
+## Bootstrap: SSH Agent Forwarding (Local -> LXC1 -> LXC2)
+
+This workflow keeps the private key only on your local machine. LXC1 (infra-mgmt) stores the public key for Terraform to inject into new LXCs (LXC2), and Ansible uses SSH agent forwarding to authenticate without private keys on LXC1 or LXC2.
+
+### 1. Local machine: create key + enable agent forwarding
+
+Generate a dedicated ED25519 key for the homelab if it does not exist:
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_proxmox -C "homelab-proxmox"
+```
+
+Add a wildcard SSH config so all 192.168.1.* hosts use the key and forward the agent:
+
+```sshconfig
+Host 192.168.1.*
+   User root
+   IdentityFile ~/.ssh/id_ed25519_proxmox
+   IdentitiesOnly yes
+   ForwardAgent yes
+```
+
+Start the agent and load the key:
+
+```bash
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519_proxmox
+```
+
+### 2. Local machine: authorize access to LXC1
+
+Authorize your public key on LXC1 so you can log in:
+
+```bash
+ssh-copy-id -i ~/.ssh/id_ed25519_proxmox.pub root@192.168.1.X
+```
+
+Note: `authorized_keys` is the required filename on the server. Do not rename it.
+
+### 3. Local machine -> LXC1: copy the public key for Terraform
+
+Copy only the public key to LXC1 so Terraform can read it:
+
+```bash
+scp ~/.ssh/id_ed25519_proxmox.pub infra@infra-mgmt:~/.ssh/id_ed25519_proxmox.pub
+```
+
+### 4. LXC1 (infra-mgmt): Terraform key injection
+
+Set the public key path used by Terraform on LXC1:
+
+```hcl
+# terraform/environments/homelab/terraform.tfvars
+ssh_public_key_path = "~/.ssh/id_ed25519_proxmox.pub"
+```
+
+Terraform injects this public key into each new LXC at creation time via the Proxmox initialization block. No private keys are stored on LXC1 or LXC2.
+
+Apply Terraform from LXC1:
+
+```bash
+infra@infra-mgmt:~$ cd /path/to/infra/terraform/environments/homelab
+infra@infra-mgmt:~$ terraform init
+infra@infra-mgmt:~$ terraform apply
+```
+
+### 5. LXC1 (infra-mgmt): Ansible with SSH agent forwarding
+
+Ensure Ansible keeps agent forwarding enabled:
+
+```ini
+# ansible/ansible.cfg
+[ssh_connection]
+ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o ForwardAgent=yes
+```
+
+When using agent forwarding, do not set `ansible_ssh_private_key_file` in group vars.
+
+### 6. LXC2: disable password SSH (Ansible snippet)
+
+Add the following tasks to the playbook that configures LXC2:
+
+```yaml
+- name: Harden SSH settings
+   ansible.builtin.lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: "^{{ item.key }}"
+      line: "{{ item.key }} {{ item.value }}"
+      create: false
+   loop:
+      - { key: "PasswordAuthentication", value: "no" }
+      - { key: "ChallengeResponseAuthentication", value: "no" }
+      - { key: "PermitRootLogin", value: "prohibit-password" }
+   notify: Restart ssh
+
+handlers:
+   - name: Restart ssh
+      ansible.builtin.service:
+         name: ssh
+         state: restarted
+```
+
+### 7. Verify agent forwarding and key-only SSH
+
+After logging into LXC1 with agent forwarding enabled:
+
+```bash
+infra@infra-mgmt:~$ ssh-add -l
+infra@infra-mgmt:~$ ansible -m ping reverse-proxy
+```
+
+On LXC2, confirm password auth is disabled:
+
+```bash
+sshd -T | grep -E 'passwordauthentication|challengeresponseauthentication|permitrootlogin'
+```
 
 ## Workflow: Traefik Reverse Proxy Setup
 
@@ -101,4 +218,3 @@ sudo update-ca-certificates
 - DNS: 192.168.1.90
 - IPv6: auto (SLAAC)
 - Template: ubuntu-24.04-standard_24.04-2_amd64.tar.zst
-```
