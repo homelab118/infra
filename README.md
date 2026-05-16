@@ -178,7 +178,7 @@ sshd -T | grep -E 'passwordauthentication|challengeresponseauthentication|permit
 
 ### 2. Configure Traefik with Ansible
 1. Navigate to the Ansible directory: `cd ansible`
-2. Verify `inventory/hosts.ini` has the correct LXC IP (default `192.168.1.110`).
+2. Verify `inventory/hosts.ini` has the correct LXC IP (default `192.168.1.122`).
 3. Verify your Traefik services and domain (`homelab118.home`) are configured in `inventory/group_vars/reverse_proxy.yml`.
 4. Run the configuration playbook:
    ```bash
@@ -193,7 +193,7 @@ Run the following commands on your **local machine** (assuming Ubuntu/Debian):
 
 ```bash
 # 1. Pull the newly generated cert to your local machine
-scp root@192.168.1.110:/etc/traefik/certs/traefik.crt ./traefik.crt
+scp root@192.168.1.122:/etc/traefik/certs/traefik.crt ./traefik.crt
 
 # 2. Clean out old conflicting certs from Chrome's database (ignore errors if not present)
 certutil -d sql:$HOME/.pki/nssdb -D -n "traefik" || true
@@ -209,12 +209,12 @@ sudo update-ca-certificates
 
 **Important:** Fully close and reopen Chrome for the trusted certificate to take effect.
 
-> **Regenerating Certs:** If you change the domain name or need to regenerate the cert later, first delete them from the LXC (`ssh root@192.168.1.110 "rm -f /etc/traefik/certs/traefik.*"`), rerun the Ansible playbook, and repeat the local trust steps above.
+> **Regenerating Certs:** If you change the domain name or need to regenerate the cert later, first delete them from the LXC (`ssh root@192.168.1.122 "rm -f /etc/traefik/certs/traefik.*"`), rerun the Ansible playbook, and repeat the local trust steps above.
 
 ## Defaults
 
 - LXC: 1 vCPU, 512MB RAM, 8GB disk, 256MB swap
-- IPv4: 192.168.1.110/24, gateway 192.168.1.1
+- IPv4: 192.168.1.122/24, gateway 192.168.1.1
 - DNS: 192.168.1.90
 - IPv6: auto (SLAAC)
 - Template: ubuntu-24.04-standard_24.04-2_amd64.tar.zst

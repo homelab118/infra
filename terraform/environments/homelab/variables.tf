@@ -65,7 +65,7 @@ variable "lxc_bridge" {
 variable "lxc_ipv4_address" {
   type        = string
   description = "IPv4 address in CIDR notation"
-  default     = "192.168.1.110/24"
+  default     = "192.168.1.122/24"
 }
 
 variable "lxc_ipv4_gateway" {
