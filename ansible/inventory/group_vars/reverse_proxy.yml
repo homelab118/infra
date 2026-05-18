@@ -5,9 +5,15 @@ traefik_enable_dashboard: true
 traefik_dashboard_host: "traefik.{{ traefik_domain }}"
 
 traefik_http_services:
-  - name: proxmox
-    host: "proxmox.{{ traefik_domain }}"
-    url: "https://192.168.1.100:8006"
+  - name: proxmox-main
+    host: "pve-main.{{ traefik_domain }}"
+    url: "https://192.168.1.110:8006"
+    servers_transport: proxmox-insecure
+    flush_interval: "-1"
+  
+  - name: proxmox-sony
+    host: "pve-1.{{ traefik_domain }}"
+    url: "https://192.168.1.111:8006"
     servers_transport: proxmox-insecure
     flush_interval: "-1"
 
