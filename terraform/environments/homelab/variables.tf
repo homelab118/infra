@@ -83,7 +83,7 @@ variable "lxc_ipv6_address" {
 variable "lxc_dns_servers" {
   type        = list(string)
   description = "DNS servers"
-  default     = ["192.168.1.90"]
+  default     = ["192.168.1.120"]
 }
 
 variable "lxc_disk_size_gb" {
