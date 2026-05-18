@@ -120,7 +120,7 @@ Ensure Ansible keeps agent forwarding enabled:
 ```ini
 # ansible/ansible.cfg
 [ssh_connection]
-ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o ForwardAgent=yes
+ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o ForwardAgent=yes -o IdentitiesOnly=no
 ```
 
 When using agent forwarding, do not set `ansible_ssh_private_key_file` in group vars.
@@ -131,22 +131,22 @@ Add the following tasks to the playbook that configures LXC2:
 
 ```yaml
 - name: Harden SSH settings
-   ansible.builtin.lineinfile:
-      path: /etc/ssh/sshd_config
-      regexp: "^{{ item.key }}"
-      line: "{{ item.key }} {{ item.value }}"
-      create: false
-   loop:
-      - { key: "PasswordAuthentication", value: "no" }
-      - { key: "ChallengeResponseAuthentication", value: "no" }
-      - { key: "PermitRootLogin", value: "prohibit-password" }
-   notify: Restart ssh
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^{{ item.key }}"
+    line: "{{ item.key }} {{ item.value }}"
+    create: false
+  loop:
+    - { key: "PasswordAuthentication", value: "no" }
+    - { key: "ChallengeResponseAuthentication", value: "no" }
+    - { key: "PermitRootLogin", value: "prohibit-password" }
+  notify: Restart ssh
 
 handlers:
-   - name: Restart ssh
-      ansible.builtin.service:
-         name: ssh
-         state: restarted
+  - name: Restart ssh
+    ansible.builtin.service:
+      name: ssh
+      state: restarted
 ```
 
 ### 7. Verify agent forwarding and key-only SSH
@@ -155,6 +155,7 @@ After logging into LXC1 with agent forwarding enabled:
 
 ```bash
 infra@infra-mgmt:~$ ssh-add -l
+infra@infra-mgmt:~$ cd ~/infra/ansible
 infra@infra-mgmt:~$ ansible -m ping reverse-proxy
 ```
 
@@ -163,6 +164,11 @@ On LXC2, confirm password auth is disabled:
 ```bash
 sshd -T | grep -E 'passwordauthentication|challengeresponseauthentication|permitrootlogin'
 ```
+
+Troubleshooting:
+
+- If you see "No inventory was parsed", you are not in the `ansible` directory. Run `cd ~/infra/ansible` or pass `-i inventory/hosts.ini`.
+- If SSH asks for a password from LXC1, make sure you logged into LXC1 with `ssh -A` and that LXC1 does not have `IdentityFile` or `IdentitiesOnly` set in `/root/.ssh/config` for `192.168.1.*`.
 
 ## Workflow: Traefik Reverse Proxy Setup
 
