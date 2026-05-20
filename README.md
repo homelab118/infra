@@ -9,12 +9,20 @@ infra/
 ├── terraform/
 │   ├── environments/
 │   │   └── homelab/
-│   │       ├── main.tf
-│   │       ├── providers.tf
-│   │       ├── variables.tf
-│   │       ├── locals.tf
-│   │       ├── outputs.tf
-│   │       └── terraform.tfvars.example
+│   │       ├── databases/
+│   │       │   ├── main.tf
+│   │       │   ├── providers.tf
+│   │       │   ├── variables.tf
+│   │       │   ├── locals.tf
+│   │       │   ├── outputs.tf
+│   │       │   └── terraform.tfvars.example
+│   │       └── networking/
+│   │           ├── main.tf
+│   │           ├── providers.tf
+│   │           ├── variables.tf
+│   │           ├── locals.tf
+│   │           ├── outputs.tf
+│   │           └── terraform.tfvars.example
 │   └── modules/
 │       └── lxc/
 │           ├── main.tf
@@ -99,7 +107,7 @@ scp ~/.ssh/id_ed25519_proxmox.pub infra@infra-mgmt:~/.ssh/id_ed25519_proxmox.pub
 Set the public key path used by Terraform on LXC1:
 
 ```hcl
-# terraform/environments/homelab/terraform.tfvars
+# terraform/environments/homelab/networking/terraform.tfvars
 ssh_public_key_path = "~/.ssh/id_ed25519_proxmox.pub"
 ```
 
@@ -108,7 +116,7 @@ Terraform injects this public key into each new LXC at creation time via the Pro
 Apply Terraform from LXC1:
 
 ```bash
-infra@infra-mgmt:~$ cd /path/to/infra/terraform/environments/homelab
+infra@infra-mgmt:~$ cd /path/to/infra/terraform/environments/homelab/networking
 infra@infra-mgmt:~$ terraform init
 infra@infra-mgmt:~$ terraform apply
 ```
@@ -173,7 +181,7 @@ Troubleshooting:
 ## Workflow: Traefik Reverse Proxy Setup
 
 ### 1. Provision Infrastructure with Terraform
-1. Navigate to the homelab environment: `cd terraform/environments/homelab`
+1. Navigate to the homelab environment: `cd terraform/environments/homelab/networking`
 2. Create your variables file: `cp terraform.tfvars.example terraform.tfvars`
 3. Edit `terraform.tfvars` with your Proxmox credentials and the local Proxmox template ID (`lxc_template_file_id`).
 4. Initialize and apply: 
@@ -221,6 +229,6 @@ sudo update-ca-certificates
 
 - LXC: 1 vCPU, 512MB RAM, 8GB disk, 256MB swap
 - IPv4: 192.168.1.122/24, gateway 192.168.1.1
-- DNS: 192.168.1.90
+- DNS: 192.168.1.120
 - IPv6: auto (SLAAC)
 - Template: ubuntu-24.04-standard_24.04-2_amd64.tar.zst

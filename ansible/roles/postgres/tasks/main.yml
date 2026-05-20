@@ -1,0 +1,4 @@
+---
+- name: Install Postgres (Placeholder)
+  ansible.builtin.debug:
+    msg: "Postgres installation tasks go here"
