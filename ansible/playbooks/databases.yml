@@ -1,6 +1,7 @@
 ---
-- name: Configure Postgres Database Server
+- name: Configure Database Servers
   hosts: postgres
   become: yes
   roles:
     - postgres
+    - mongodb

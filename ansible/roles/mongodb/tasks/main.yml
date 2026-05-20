@@ -1,0 +1,58 @@
+---
+- name: Ensure keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Add MongoDB GPG key
+  ansible.builtin.get_url:
+    url: "https://pgp.mongodb.com/server-{{ mongodb_version }}.asc"
+    dest: "/etc/apt/keyrings/mongodb-server-{{ mongodb_version }}.asc"
+    mode: '0644'
+
+- name: Add MongoDB APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [ arch=amd64,arm64 signed-by=/etc/apt/keyrings/mongodb-server-{{ mongodb_version }}.asc ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/{{ mongodb_version }} multiverse"
+    state: present
+    filename: mongodb-org-{{ mongodb_version }}
+
+- name: Install MongoDB packages
+  ansible.builtin.apt:
+    name: 
+      - mongodb-org
+      - python3-pymongo
+    state: present
+    update_cache: yes
+
+- name: Configure MongoDB bindIp
+  ansible.builtin.lineinfile:
+    path: /etc/mongod.conf
+    regexp: '^\s*bindIp:.*'
+    line: '  bindIp: {{ mongodb_bind_ip }}'
+  notify: Restart mongod
+
+- name: Ensure MongoDB service is started and enabled
+  ansible.builtin.systemd:
+    name: mongod
+    state: started
+    enabled: yes
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for MongoDB to become ready
+  ansible.builtin.wait_for:
+    port: "{{ mongodb_port }}"
+    delay: 2
+
+- name: Create default admin user
+  community.mongodb.mongodb_user:
+    database: admin
+    name: "{{ mongodb_admin_user }}"
+    password: "{{ mongodb_admin_password }}"
+    roles:
+      - db: admin
+        role: root
+    state: present
+    login_port: "{{ mongodb_port }}"

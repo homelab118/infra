@@ -1,4 +1,44 @@
 ---
-- name: Install Postgres (Placeholder)
-  ansible.builtin.debug:
-    msg: "Postgres installation tasks go here"
+- name: Install Postgres packages
+  ansible.builtin.apt:
+    name:
+      - postgresql-{{ postgres_version }}
+      - postgresql-contrib
+      - python3-psycopg2
+      - acl
+    state: present
+    update_cache: yes
+
+- name: Ensure Postgres service is started and enabled
+  ansible.builtin.systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Configure listen_addresses
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/{{ postgres_version }}/main/postgresql.conf
+    regexp: "^#?listen_addresses = .*"
+    line: "listen_addresses = '{{ postgres_listen_addresses }}'"
+  notify: Restart postgres
+
+- name: Allow homelab subnet access
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
+    line: "host    all             all             {{ item }}            scram-sha-256"
+    insertafter: "^# IPv4 local connections:"
+  loop: "{{ postgres_allowed_subnets }}"
+  notify: Reload postgres
+
+# Flush handlers so service is restarted/reloaded before creating the user
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Create default admin user
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ postgres_admin_user }}"
+    password: "{{ postgres_admin_password }}"
+    role_attr_flags: SUPERUSER
+    state: present

@@ -1,0 +1,8 @@
+---
+postgres_version: "16"
+postgres_listen_addresses: "*"
+postgres_port: 5432
+postgres_admin_user: "dbadmin"
+postgres_admin_password: "change-me"
+postgres_allowed_subnets:
+  - "192.168.1.0/24"
