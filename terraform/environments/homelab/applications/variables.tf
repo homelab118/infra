@@ -29,19 +29,19 @@ variable "ssh_public_key_path" {
 variable "lxc_node_name" {
   type        = string
   description = "Proxmox node name"
-  default     = "proxmox"
+  default     = "pve-main"
 }
 
 variable "lxc_vm_id" {
   type        = number
   description = "LXC container ID"
-  default     = 110
+  default     = 202
 }
 
 variable "lxc_hostname" {
   type        = string
   description = "LXC hostname"
-  default     = "reverse-proxy"
+  default     = "streaming"
 }
 
 variable "lxc_datastore_id" {
@@ -65,7 +65,7 @@ variable "lxc_bridge" {
 variable "lxc_ipv4_address" {
   type        = string
   description = "IPv4 address in CIDR notation"
-  default     = "192.168.1.122/24"
+  default     = "192.168.1.130/24"
 }
 
 variable "lxc_ipv4_gateway" {
@@ -89,25 +89,25 @@ variable "lxc_dns_servers" {
 variable "lxc_disk_size_gb" {
   type        = number
   description = "Rootfs size in GB"
-  default     = 4
+  default     = 16
 }
 
 variable "lxc_memory_mb" {
   type        = number
   description = "Dedicated memory in MB"
-  default     = 512
+  default     = 4096
 }
 
 variable "lxc_swap_mb" {
   type        = number
   description = "Swap size in MB"
-  default     = 256
+  default     = 1024
 }
 
 variable "lxc_cpu_cores" {
   type        = number
   description = "CPU cores"
-  default     = 1
+  default     = 4
 }
 
 variable "lxc_unprivileged" {
@@ -149,7 +149,7 @@ variable "lxc_template_url" {
 variable "lxc_template_verify" {
   type        = bool
   description = "Verify TLS certificates for the template download"
-  default     = true
+  default     = false
 }
 
 variable "lxc_root_password" {
@@ -162,5 +162,11 @@ variable "lxc_root_password" {
 variable "lxc_tags" {
   type        = list(string)
   description = "Container tags"
-  default     = ["infra", "reverse-proxy"]
+  default     = ["application", "plex"]
+}
+
+variable "lxc_nesting" {
+  type        = bool
+  description = "Enable nesting"
+  default     = true
 }
