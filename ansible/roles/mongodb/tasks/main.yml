@@ -11,15 +11,22 @@
     dest: "/etc/apt/keyrings/mongodb-server-{{ mongodb_version }}.asc"
     mode: '0644'
 
+- name: Add focal-security APT repository for libssl1.1 (required for MongoDB 4.4)
+  ansible.builtin.apt_repository:
+    repo: "deb http://security.ubuntu.com/ubuntu focal-security main"
+    state: present
+    filename: focal-security
+
 - name: Add MongoDB APT repository
   ansible.builtin.apt_repository:
-    repo: "deb [ arch=amd64,arm64 signed-by=/etc/apt/keyrings/mongodb-server-{{ mongodb_version }}.asc ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/{{ mongodb_version }} multiverse"
+    repo: "deb [ arch=amd64,arm64 signed-by=/etc/apt/keyrings/mongodb-server-{{ mongodb_version }}.asc ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/{{ mongodb_version }} multiverse"
     state: present
     filename: mongodb-org-{{ mongodb_version }}
 
 - name: Install MongoDB packages
   ansible.builtin.apt:
     name: 
+      - libssl1.1
       - mongodb-org
       - python3-pymongo
     state: present
