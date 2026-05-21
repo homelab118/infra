@@ -17,9 +17,9 @@ traefik_http_services:
     servers_transport: proxmox-insecure
     flush_interval: "-1"
 
-  - name: jellyfin
-    host: "jellyfin.{{ traefik_domain }}"
-    url: "http://192.168.1.120:8096"
+  - name: plex
+    host: "plex.{{ traefik_domain }}"
+    url: "http://192.168.1.130:32400"
 
   - name: vault
     host: "vault.{{ traefik_domain }}"
