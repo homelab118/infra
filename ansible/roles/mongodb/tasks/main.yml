@@ -24,6 +24,8 @@
       - python3-pymongo
     state: present
     update_cache: yes
+  environment:
+    DEBIAN_FRONTEND: noninteractive
 
 - name: Configure MongoDB bindIp
   ansible.builtin.lineinfile:
@@ -45,6 +47,7 @@
   ansible.builtin.wait_for:
     port: "{{ mongodb_port }}"
     delay: 2
+    timeout: 30
 
 - name: Create default admin user
   community.mongodb.mongodb_user:
