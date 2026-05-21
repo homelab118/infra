@@ -1,0 +1,6 @@
+---
+- name: Configure Applications
+  hosts: applications
+  become: yes
+  roles:
+    - plex

@@ -1,0 +1,9 @@
+---
+- name: Restart plex
+  ansible.builtin.systemd:
+    name: plexmediaserver
+    state: restarted
+
+- name: Reload ufw
+  community.general.ufw:
+    state: reloaded

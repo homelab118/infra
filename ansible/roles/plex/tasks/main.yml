@@ -1,0 +1,57 @@
+---
+- name: Ensure keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Add Plex APT key
+  ansible.builtin.get_url:
+    url: https://downloads.plex.tv/plex-keys/PlexSign.key
+    dest: /etc/apt/keyrings/plex.asc
+    mode: '0644'
+
+- name: Add Plex APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/plex.asc] https://downloads.plex.tv/repo/deb public main"
+    state: present
+    filename: plexmediaserver
+
+- name: Install Plex Media Server and UFW
+  ansible.builtin.apt:
+    name: 
+      - plexmediaserver
+      - ufw
+    state: present
+    update_cache: yes
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: Ensure render group exists
+  ansible.builtin.group:
+    name: render
+    state: present
+
+- name: Add plex user to render and video groups for QuickSync
+  ansible.builtin.user:
+    name: plex
+    groups: video,render
+    append: yes
+  notify: Restart plex
+
+- name: Allow SSH through UFW
+  community.general.ufw:
+    rule: allow
+    port: "{{ ssh_port }}"
+    proto: tcp
+
+- name: Allow Plex through UFW
+  community.general.ufw:
+    rule: allow
+    port: "{{ plex_port }}"
+    proto: tcp
+
+- name: Enable UFW and set default deny
+  community.general.ufw:
+    state: enabled
+    policy: deny
