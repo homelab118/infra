@@ -22,6 +22,7 @@ module "streaming" {
   swap_mb               = 1024
   cpu_cores             = 4
   unprivileged          = false # Must be privileged for easy GPU passthrough
+  nesting               = false # Proxmox API tokens cannot set nesting=true on privileged LXCs
   start_on_boot         = var.lxc_start_on_boot
   started               = var.lxc_started
   template_file_id      = var.lxc_template_file_id

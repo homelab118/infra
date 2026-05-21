@@ -19,6 +19,6 @@ output "ipv6_addresses" {
 }
 
 output "ipv4_address" {
-  value       = proxmox_virtual_environment_container.this.ipv4["veth0"]
+  value       = try(proxmox_virtual_environment_container.this.ipv4["veth0"], split("/", var.ipv4_address)[0])
   description = "Primary IPv4 address"
 }

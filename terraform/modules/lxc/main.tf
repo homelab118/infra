@@ -86,7 +86,7 @@ resource "proxmox_virtual_environment_container" "this" {
   }
 
   features {
-    nesting = false
+    nesting = var.nesting
     keyctl  = false
   }
 }

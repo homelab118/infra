@@ -132,3 +132,9 @@ variable "tags" {
   description = "Container tags"
   default     = []
 }
+
+variable "nesting" {
+  type        = bool
+  description = "Enable nesting (required for Ubuntu 22.04+ systemd)"
+  default     = true
+}
